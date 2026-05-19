@@ -1,5 +1,5 @@
 ### Allgemeiner Import der API und des Keys:
-from openai import OpenAI
+import openai
 from pydantic import BaseModel, Field
 import os
 from dotenv import load_dotenv
@@ -41,34 +41,28 @@ TEST_INPUT_WIKI_TEXT = ("The United States of America (USA), also known as the U
                         "global political, cultural, economic, and military affairs.")
 
 load_dotenv()
-API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=API_KEY)
 
 
-class SubtopicItem(BaseModel):
-    title: str = Field(
-        description="A catchy, thrilling podcast-style title for the subtopic."
-    )
-    description: str = Field(
-        description="A punchy, fun, and impossible-to-ignore summary."
-    )
 
 
 class SubtopicsResponse(BaseModel):
     # This structure guarantees the API returns a structured array of items
-    subtopics: list[SubtopicItem] = Field(
-        description="A list containing exactly 4 distinct, enticing subtopics."
+    subtopics: list[str] = Field(
+        description="A list containing exactly 4 distinct subtopics. Only short titles."
     )
-
 
 class FactsResponse(BaseModel):
     facts: list[str] = Field(
-        description="Exactly 5 mind-blowing and highly accurate facts strictly tied to the topic."
+        description="Exactly 5 mind-blowing and highly accurate facts strictly tied to the topic. Insert a line break after 78-88 characters to keep it readable."
     )
 
+def get_openai_client():
+    API_KEY = os.getenv("OPENAI_API_KEY")
+    client = openai.OpenAI(api_key=API_KEY)
+    return client
 
 """!!!Use .subtopics[index] to access the subtopic items!!!"""
-def generate_subtopics(client, wiki_content: str) -> SubtopicsResponse:
+def generate_subtopics(wiki_content: str) -> SubtopicsResponse:
     """Feeds the wiki string to GPT-5 Nano and returns a validated Pydantic object."""
     system_instruction = (
         "You are a charismatic, witty storyteller and researcher. Look at raw text "
@@ -76,9 +70,11 @@ def generate_subtopics(client, wiki_content: str) -> SubtopicsResponse:
     )
 
     user_prompt = (
-        "Analyze this Wikipedia data and give me exactly 4 distinct subtopics.\n\n"
+        "Analyze this Wikipedia data and give me exactly 4 distinct subtopics that are in the given wiki content.\n\n"
         f"--- WIKI CONTENT ---\n{wiki_content}\n--- END WIKI CONTENT ---"
     )
+
+    client = get_openai_client()
 
     try:
         # Using the .beta client block for strict schema compliance enforcement
@@ -92,23 +88,31 @@ def generate_subtopics(client, wiki_content: str) -> SubtopicsResponse:
             temperature=1,
         )
         # Returns the automatically parsed Pydantic object directly
-        return response.choices[0].message.parsed
+        return response.choices[0].message.parsed.subtopics
     except Exception as e:
         print(f"🧬 Uh oh, API error while pulling topics: {e}")
         return None
 """!!!Use .subtopics[index] to access the subtopic items!!!"""
 
 
-def get_fantastic5(information, subtopic) -> list[str]:
+def get_fantastic5(information, subtopic, stick_to_article_only = True) -> list[str] | None:
     """ Tells GPT-5 Nano to generate 5 facts about the given information. In case there are no facts, it returns 'No facts found.'
     :param information: String containing the information about main topic
     :param subtopic: Subtopic that specifies what the output facts should be about
+    :param stick_to_article_only: If True, the output facts will only be about the given information.
     :return: list of 5 facts as strings
     written by Linda
     """
     role_description = "You are a charismatic, witty storyteller and researcher."
-    user_prompt = (f"Generate 5 facts about {information} in the subtopic of {subtopic}. "
-                   f"Stick to the given information. If there aren't any facts, return 'No facts found.'")
+    if stick_to_article_only:
+        user_prompt = (f"Strictly use {information} to generate 5 facts about {subtopic}. "
+                       f"Keep {information} and {subtopic} in correlation.")
+
+    else:
+        user_prompt = f"Generate 5 facts about {information} in relation to {subtopic}."
+
+    client = get_openai_client()
+
     try:
         response = client.chat.completions.parse(
             model="gpt-5-nano",
@@ -121,8 +125,4 @@ def get_fantastic5(information, subtopic) -> list[str]:
     except Exception as e:
         print(f"Uh oh, seems I couldn't run your request: {e}")
         return None
-    return response.choices[0].message.parsed
-
-
-test_output_5facts = get_fantastic5(TEST_INPUT_WIKI_TEXT, "Instrumental music")
-print(test_output_5facts)
+    return response.choices[0].message.parsed.facts

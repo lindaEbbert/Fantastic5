@@ -1,2 +1,0 @@
-import wiki
-import openai_api
