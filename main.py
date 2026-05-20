@@ -10,7 +10,7 @@ five_fact_foundry_theme = Theme({"input":"green", "waiting":"yellow", "output":"
 console = Console(theme = five_fact_foundry_theme)
 
 
-def titel_print(fun=False):
+def print_titel(fun=False):
     """ Prints the titel of the program"""
     if not fun:
         console.print("*************************************", style="blue on white")
@@ -81,7 +81,7 @@ def choose_one_of_the_first_5():
     return user_first_5_choice
 
 
-def get_the_chosen_word(number_of_choice, wiki_output_first_5):
+def get_user_choice_str(number_of_choice, wiki_output_first_5):
     """ Gets the chosen word from the wiki_output_first_5 list
     :param number_of_choice: User input as int (1-5)
     :param wiki_output_first_5: list of 5 strings
@@ -108,7 +108,7 @@ def get_the_chosen_word(number_of_choice, wiki_output_first_5):
         console.print("Invalid input!\n", style="bold white on red1")
 
 
-def show_us_the_5_subtopics(the_5_subtopics):
+def print_the_subtopics_options(the_5_subtopics):
     """ Prints the 5 subtopics of the chosen topic enumerated
     :param the_5_subtopics: list of 5 strings
     """
@@ -167,29 +167,22 @@ def get_the_chosen_subtopic(selected_subtopic_int, subtopics_list):
     return subtopic_str
 
 
-def print_final_fantastic_5(the_5_facts, choose_subtopic):
+def print_final_facts(the_5_facts, chosen_topic, fun=False):
     """ Prints the final 5 facts of the chosen subtopic
     :param the_5_facts: list of 5 strings (facts)
-    :param choose_subtopic: string of chosen subtopic
+    :param chosen_topic: string of chosen subtopic
     """
-    console.print(f"And here are your final [bold blue]FANTASTIC 5[/] facts about [bold green]{choose_subtopic}[/]:", style = "choice")
+    if not fun:
+        console.print(f"And here are your final [bold blue]FANTASTIC 5[/] facts about [bold green]{chosen_topic}[/]:", style ="choice")
+    else:
+        console.print(f"And here are your final [bold blue][bold red]FUN[/]tastic 5[/] about {chosen_topic}:\n",
+                      style="choice")
     print(" ")
     print(f"1. {the_5_facts[0]}", end="\n\n")
     print(f"2. {the_5_facts[1]}", end="\n\n")
     print(f"3. {the_5_facts[2]}", end="\n\n")
     print(f"4. {the_5_facts[3]}", end="\n\n")
     print(f"5. {the_5_facts[4]}", end="\n\n")
-
-
-def print_final_funtastic_5(the_5_facts, chosen_topic):
-    console.print(f"And here are your final [bold blue][bold red]FUN[/]tastic 5[/] about {chosen_topic}:\n", style = "choice")
-    print(" ")
-    print(f"1. {the_5_facts[0]}", end="\n\n")
-    print(f"2. {the_5_facts[1]}", end="\n\n")
-    print(f"3. {the_5_facts[2]}", end="\n\n")
-    print(f"4. {the_5_facts[3]}", end="\n\n")
-    print(f"5. {the_5_facts[4]}", end="\n\n")
-    return None
 
 
 def run_fantastic_5(funtastic = False):
@@ -207,49 +200,50 @@ def run_fantastic_5(funtastic = False):
 
     # user chooses topic
     selected_first_5 = choose_one_of_the_first_5()
-    chosen_topic = get_the_chosen_word(selected_first_5, wiki_output_first_5)
+    chosen_topic = get_user_choice_str(selected_first_5, wiki_output_first_5)
     get_wiki_text = wiki.wiki_text(chosen_topic)
 
     if not funtastic:
         # get subtopics
         print_waiting_message_before_subtopic_generation()
         nano_subtopics = openai_api.generate_subtopics(get_wiki_text)
-        show_us_the_5_subtopics(nano_subtopics)
+        print_the_subtopics_options(nano_subtopics)
         selected_subtopic = choose_one_of_the_subtopics()  # returns int
         # user chooses subtopic
         chosen_subtopic = get_the_chosen_subtopic(selected_subtopic, nano_subtopics)  # takes int and returns str
         # OPENAI API CALL
         the_5_facts = openai_api.get_fantastic5(get_wiki_text, chosen_subtopic, stick_to_article_only=(selected_subtopic != 5))  # sticks to article only if user selected suggested subtopic
-        print_final_fantastic_5(the_5_facts, chosen_subtopic)
+        print_final_facts(the_5_facts, chosen_subtopic)
     else:
         # OPENAI API CALL
         the_5_facts = openai_api.get_funtastic5(get_wiki_text, chosen_topic)
-        print_final_funtastic_5(the_5_facts, chosen_topic)
+        print_final_facts(the_5_facts, chosen_topic, fun=True)
+    return None
 
 
 def run_funfacts_for_random_topic():
     random_articles = wiki.wiki_random()
     show_us_the_first_5(random_articles)
     selected_article_int = choose_one_of_the_first_5()
-    chosen_topic = get_the_chosen_word(selected_article_int, random_articles)
+    chosen_topic = get_user_choice_str(selected_article_int, random_articles)
     wiki_text = wiki.wiki_text(chosen_topic)
     the_5_facts = openai_api.get_funtastic5(wiki_text, chosen_topic)
-    print_final_funtastic_5(the_5_facts, chosen_topic)
+    print_final_facts(the_5_facts, chosen_topic, fun=True)
 
 
 def run_fantastic_5_for_random():
     random_articles = wiki.wiki_random()
     show_us_the_first_5(random_articles)
     selected_article_int = choose_one_of_the_first_5()
-    chosen_topic = get_the_chosen_word(selected_article_int, random_articles)
+    chosen_topic = get_user_choice_str(selected_article_int, random_articles)
     wiki_text = wiki.wiki_text(chosen_topic)
     print_waiting_message_before_subtopic_generation()
     subtopics_by_ai = openai_api.generate_subtopics(wiki_text)
-    show_us_the_5_subtopics(subtopics_by_ai)
+    print_the_subtopics_options(subtopics_by_ai)
     selected_subtopic_int = choose_one_of_the_subtopics()
     chosen_subtopic = get_the_chosen_subtopic(selected_subtopic_int, subtopics_by_ai)
     fantastic_five_facts = openai_api.get_fantastic5(wiki_text, chosen_subtopic, stick_to_article_only=(selected_subtopic_int != 5))  # sticks to article only if user selected suggested subtopic
-    print_final_fantastic_5(fantastic_five_facts, chosen_subtopic)
+    print_final_facts(fantastic_five_facts, chosen_subtopic)
 
 
 def display_menu():
@@ -275,14 +269,14 @@ def user_choice_menu():
         run_fantastic_5_for_random()
     elif user_choice == "3":
         print(" ")
-        titel_print(fun=True)
+        print_titel(fun=True)
         print(" ")
         console.print("Guess you ate a clown for breakfast! 🤡", style="waiting")
         print(" ")
         run_fantastic_5(funtastic=True)
     elif user_choice =="4":
         print(" ")
-        titel_print(fun=True)
+        print_titel(fun=True)
         print(" ")
         console.print("☢️ 🔥  HQ is gonna have a meltdown 🔥 ☢️", style="waiting")
         print(" ")
@@ -360,7 +354,7 @@ def print_goodbye():
 
 def main():
     try:
-        titel_print(fun=False)
+        print_titel(fun=False)
         while True:
             display_menu()
             user_choice_menu()
