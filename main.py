@@ -1,14 +1,22 @@
+from rich.spinner import Spinner
+
 import modules.wiki as wiki
 import modules.openai_api as openai_api
 from modules.input_validation import check_topic_input_from_user_is_ok, check_themesearch_output
 import time
 from rich.progress import track
 from rich.console import Console
+from rich import live
 from rich.theme import Theme
+
 
 five_fact_foundry_theme = Theme({"input":"green", "waiting":"yellow", "output":"blue", "choice":"cyan"})
 console = Console(theme = five_fact_foundry_theme)
-
+REFRESH_TIME=0.1
+#spinner = Spinner("aesthetic", "Be patient, I'm working on it...")
+#spinner = Spinner("shark", "Be patient, I'm working on it...")
+spinner = Spinner("bouncingBar", "Be patient, I'm working on it...")
+#spinner = Spinner("material", "Be patient, I'm working on it...")
 
 def print_titel(fun=False):
     """ Prints the titel of the program"""
@@ -213,21 +221,36 @@ def run_fantastic_5(funtastic = False):
 
     if not funtastic:
         # get subtopics
-        print_waiting_message_before_subtopic_generation()
-        nano_subtopics = openai_api.generate_subtopics(get_wiki_text)
+        #print_waiting_message_before_subtopic_generation()
+        with live.Live(spinner, refresh_per_second=REFRESH_TIME):
+            nano_subtopics = openai_api.generate_subtopics(get_wiki_text)
         print_the_subtopics_options(nano_subtopics)
         selected_subtopic = choose_one_of_the_subtopics()  # returns int
         # user chooses subtopic
         chosen_subtopic = get_the_chosen_subtopic(selected_subtopic, nano_subtopics)  # takes int and returns str
         # OPENAI API CALL
-        print_waiting_message_before_fact_generation(chosen_subtopic)
-        the_5_facts = openai_api.get_fantastic5(get_wiki_text, chosen_subtopic, stick_to_article_only=(selected_subtopic != 5))  # sticks to article only if user selected suggested subtopic
-        print_final_facts(the_5_facts, chosen_subtopic)
+        #print_waiting_message_before_fact_generation(chosen_subtopic)
+        while True:
+            with live.Live(spinner, refresh_per_second=REFRESH_TIME):
+                the_5_facts = openai_api.get_fantastic5(get_wiki_text, chosen_subtopic, stick_to_article_only=(selected_subtopic != 5))  # sticks to article only if user selected suggested subtopic
+            try:
+                print_final_facts(the_5_facts, chosen_subtopic)
+            except TypeError:
+                console.print("Sorry, something went wrong. Please hold the line...\n", style="bold red1")
+            else:
+                break
     else:
         # OPENAI API CALL
-        print_waiting_message_before_fact_generation(chosen_topic)
-        the_5_facts = openai_api.get_funtastic5(get_wiki_text, chosen_topic)
-        print_final_facts(the_5_facts, chosen_topic, fun=True)
+        #print_waiting_message_before_fact_generation(chosen_topic)
+        while True:
+            with live.Live(spinner, refresh_per_second=REFRESH_TIME):
+                the_5_facts = openai_api.get_funtastic5(get_wiki_text, chosen_topic)
+            try:
+                print_final_facts(the_5_facts, chosen_topic, fun=True)
+            except TypeError:
+                console.print("Sorry, something went wrong. Please hold the line...\n", style="bold red1")
+            else:
+                break
     return None
 
 
@@ -238,9 +261,16 @@ def run_funfacts_for_random_topic():
     selected_article_int = choose_one_of_the_first_5()
     chosen_topic = get_user_choice_str(selected_article_int, random_articles)
     wiki_text = wiki.wiki_text(chosen_topic)
-    print_waiting_message_before_fact_generation(chosen_topic)
-    the_5_facts = openai_api.get_funtastic5(wiki_text, chosen_topic)
-    print_final_facts(the_5_facts, chosen_topic, fun=True)
+    #print_waiting_message_before_fact_generation(chosen_topic)
+    while True:
+        with live.Live(spinner, refresh_per_second=REFRESH_TIME):
+                the_5_facts = openai_api.get_funtastic5(wiki_text, chosen_topic)
+        try:
+            print_final_facts(the_5_facts, chosen_topic, fun=True)
+        except TypeError:
+            console.print("Sorry, something went wrong. Please hold the line...\n", style="bold red1")
+        else:
+            break
 
 
 def run_fantastic_5_for_random():
@@ -255,9 +285,16 @@ def run_fantastic_5_for_random():
     print_the_subtopics_options(subtopics_by_ai)
     selected_subtopic_int = choose_one_of_the_subtopics()
     chosen_subtopic = get_the_chosen_subtopic(selected_subtopic_int, subtopics_by_ai)
-    print_waiting_message_before_fact_generation(chosen_subtopic)
-    fantastic_five_facts = openai_api.get_fantastic5(wiki_text, chosen_subtopic, stick_to_article_only=(selected_subtopic_int != 5))  # sticks to article only if user selected suggested subtopic
-    print_final_facts(fantastic_five_facts, chosen_subtopic)
+    #print_waiting_message_before_fact_generation(chosen_subtopic)
+    while True:
+        with live.Live(spinner, refresh_per_second=REFRESH_TIME):
+            fantastic_five_facts = openai_api.get_fantastic5(wiki_text, chosen_subtopic, stick_to_article_only=(selected_subtopic_int != 5))  # sticks to article only if user selected suggested subtopic
+        try:
+            print_final_facts(fantastic_five_facts, chosen_subtopic)
+        except TypeError:
+            console.print("Sorry, something went wrong. Please hold the line...\n", style="bold red1")
+        else:
+            break
 
 
 def display_menu():
@@ -376,7 +413,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# TODO: Keine Loading Bars bei Choice == 4 -> Thorsten
-# TODO: Loading Bars ersetzen oder anpassen -> Linda
