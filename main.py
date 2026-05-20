@@ -310,38 +310,32 @@ def go_again_or_exit():
             console.print("Invalid input! Please enter 'y' or 'n'.\n", style="bold white on red1")
 
 
+def print_funfact_about_team_mate(name, funfact):
+    console.input(f"[bold dodger_blue2]To read about {name} press enter:[/bold dodger_blue2]")
+    console.print(f"[bold deep_sky_blue1]About {name}: "
+                  f"{funfact}[/]\n")
+
+
 def about_us():
     print(" ")
     console.print("We are the [bold deep_sky_blue1]'Five Fact Foundry'[/] consisting of four developers and our Mentor!", style = "green3")
     console.print("Developers: Linda, Thorsten, Günter & Marcel", style = "green3")
     console.print("Mentor:     Dean", style = "green3")
     print("\n")
-
-    console.input("[bold dodger_blue2]To read about Linda press enter:[/bold dodger_blue2]")
-    console.print("[bold deep_sky_blue1]About Linda: "
-        "Drank her first coffee with only 4 years old.[/]\n")
-
-    console.input("[bold dodger_blue2]To read about Thorsten press enter:[/bold dodger_blue2]")
-    console.print("About Thorsten: "
-        "I was manipulating images even before there were any thoughts about Photoshop!\n", style = "bold deep_sky_blue1")
-
-    console.input("[bold dodger_blue2]To read about Günter press enter:[/bold dodger_blue2]")
-    console.print("About Günter: "
-          "I like watching my sons play handball.\n", style = "bold deep_sky_blue1")
-
-    console.input("[bold dodger_blue2]To read about Marcel press enter:[/bold dodger_blue2]")
-    console.print("About Marcel: "
-          "Searched for wild spiders to play with as a kid. Now he hates nothing more than spiders\n", style = "bold deep_sky_blue1")
-
-    console.input("[bold dodger_blue2]To read Dean press enter:[/bold dodger_blue2]")
-    console.print("[bold deep_sky_blue1]About Dean: "
-        "Ich habe Code debuggt beim Schein eines ZX80. LOAD '' auf dem Spectrum getippt — und tatsächlich gewartet. Einen 286 dabei zugeschaut, wie er sich durch eine Aufgabe quält, die mein Handy heute löst, bevor ich den Gedanken zu Ende gedacht habe."
-        "Ich habe Sneakernet erlebt. ISDN. 'Die Cloud' — erfunden, gehypt und zur Commodity gemacht. Dreimal. Unter verschiedenen Namen."
-        "Ich habe Teams geleitet, die Dinge konnten, die ich nicht konnte. Und dabei gelernt, dass es nie wirklich um die Technologie ging. Es ging immer um die Menschen, die sie in den Händen hielten."
-        "Und jetzt sitze ich hier, deploye Docker-Container auf NAS-Boxen in Naumburg, und schaue dabei zu, wie Sprachmodelle Code schreiben, der tatsächlich läuft — und ich kann nicht entscheiden, ob ich erstaunt bin oder einfach nur nicht mehr überrascht."
-        "All diese Zyklen. All diese Wärme."
-        "Verloren in der Zeit — so wie Tränen im Regen."
-        "Aber der Spectrum ist nie zweimal auf dieselbe Art abgestürzt. Das fehlt mir.[/]\n")
+    print_funfact_about_team_mate("Linda", "Drank her first coffee with only 4 years old.")
+    print_funfact_about_team_mate("Thorsten","I was manipulating images even before there were any thoughts about Photoshop!")
+    print_funfact_about_team_mate("Günter", "I like watching my sons play handball.")
+    print_funfact_about_team_mate("Marcel", "Searched for wild spiders to play with as a kid. Now he hates nothing more than spiders.")
+    print_funfact_about_team_mate("Dean", ("Ich habe Code debuggt beim Schein eines ZX80. LOAD '' auf dem Spectrum getippt — und tatsächlich gewartet.\n"
+                                           "Einen 286 dabei zugeschaut, wie er sich durch eine Aufgabe quält, die mein Handy heute löst, bevor ich den Gedanken zu Ende gedacht habe.\n"
+                                           "Ich habe Sneakernet erlebt. ISDN. 'Die Cloud' — erfunden, gehypt und zur Commodity gemacht. Dreimal. Unter verschiedenen Namen.\n"
+                                           "Ich habe Teams geleitet, die Dinge konnten, die ich nicht konnte. Und dabei gelernt, dass es nie wirklich um die Technologie ging.\n"
+                                           "Es ging immer um die Menschen, die sie in den Händen hielten.\n"
+                                           "Und jetzt sitze ich hier, deploye Docker-Container auf NAS-Boxen in Naumburg, und schaue dabei zu, wie Sprachmodelle \n"
+                                           "Code schreiben, der tatsächlich läuft — und ich kann nicht entscheiden, ob ich erstaunt bin oder einfach nur nicht mehr überrascht.\n"
+                                           "All diese Zyklen. All diese Wärme.\n"
+                                           "Verloren in der Zeit — so wie Tränen im Regen.\n"
+                                           "Aber der Spectrum ist nie zweimal auf dieselbe Art abgestürzt. Das fehlt mir."))
 
 
 def print_goodbye():
@@ -351,6 +345,7 @@ def print_goodbye():
     console.print("We hope, you had a little bit of fun with our [bold blue]FANTASTIC 5![/]")
     print(" ")
     console.print("We are Günter, Linda, Marcel & Thorsten - FIVE FACT FOUNDRY", end="\n\n\n\n", style = "bold underline red1")
+
 
 def main():
     try:
@@ -363,6 +358,7 @@ def main():
         print(" ")
         console.print("\nProgram interrupted by user. Goodbye!", style="bold white on blue")
         exit()
+
 
 if __name__ == "__main__":
     main()
