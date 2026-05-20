@@ -7,8 +7,9 @@ function 3: Get text from url
 """ # Linda: <3
 
 import wikipediaapi
-import random
+from functools import lru_cache
 
+@lru_cache(maxsize=128)
 def wiki_random():
     """Returns a random Wikipedia page"""
 
@@ -21,6 +22,8 @@ def wiki_random():
 
     return list(pages.keys())
 
+
+@lru_cache(maxsize=64)
 def wiki_themesearch(suggestion):
     """Returns 5 Themes from the Wikipedia API"""
 
@@ -36,7 +39,7 @@ def wiki_themesearch(suggestion):
 
     return list(results.pages.keys())
 
-
+@lru_cache(maxsize=128)
 def wiki_text(title):
     """Returns the text of the Wikipedia page"""
 

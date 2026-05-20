@@ -10,7 +10,7 @@ load_dotenv()
 class SubtopicsResponse(BaseModel):
     # This structure guarantees the API returns a structured array of items
     subtopics: list[str] = Field(
-        description="A list containing exactly 5 distinct subtopics. Only short titles."
+        description="A list containing exactly 4 distinct subtopics. Only short titles."
     )
 
 class FactsResponse(BaseModel):
@@ -22,6 +22,15 @@ class FactsResponse(BaseModel):
         )
     )
 
+class FunResponse(BaseModel):
+    # Keeping it as a flat list of strings so it doesn't break your pipeline
+    facts: list[str] = Field(
+        description=(
+            "A list of exactly 5 funny facts. Each string in the list must follow this exact multi-line template:\n"
+            "💥 [ALL-CAPS HEADLINE]\n"
+            "[The dry, observational body of the fact]\n"
+        )
+    )
 
 
 def get_openai_client():
@@ -29,8 +38,32 @@ def get_openai_client():
     client = openai.OpenAI(api_key=API_KEY)
     return client
 
-"""!!!Use .subtopics[index] to access the subtopic items!!!"""
-def generate_subtopics(wiki_content: str) -> SubtopicsResponse:
+def stylization(fact_list, stylized_facts_list):
+    for fact_string in fact_list:
+        wrapped_lines = []
+        for line in fact_string.split('\n'):
+            cleaned_line = line.strip()
+
+            # Leere Zeilen überspringen
+            if not cleaned_line:
+                wrapped_lines.append("")
+                continue
+
+            if cleaned_line.startswith("💥"):
+                # Überschrift: Bleibt linksbündig, Folgezeilen rücken 3 Leerzeichen ein
+                wrapped = textwrap.fill(cleaned_line, width=80, subsequent_indent="   ")
+            else:
+                # Fließtext: Der gesamte Block rückt 3 Leerzeichen ein, damit alles sauber untereinander steht
+                wrapped = textwrap.fill(cleaned_line, width=80, initial_indent="   ", subsequent_indent="   ")
+
+            wrapped_lines.append(wrapped)
+
+        stylized_facts_list.append("\n".join(wrapped_lines))
+
+    # Gibt die flache Liste mit den perfekt formatierten Textblöcken zurück
+    return stylized_facts_list
+
+def generate_subtopics(wiki_content: str) -> list[str]:
     """Feeds the wiki string to GPT-5 Nano and returns a validated Pydantic object."""
     system_instruction = (
         "You are a charismatic, witty storyteller and researcher. Look at raw text "
@@ -60,7 +93,45 @@ def generate_subtopics(wiki_content: str) -> SubtopicsResponse:
     except Exception as e:
         print(f"🧬 Uh oh, API error while pulling topics: {e}")
         return None
-"""!!!Use .subtopics[index] to access the subtopic items!!!"""
+
+
+def get_funtastic5(information, stick_to_article_only=True) -> list[str] | None:
+    # Upgrade the persona: Force dry, sharp, ironic humor and ban cheesy puns
+    role_description = (
+        "You are an elite writer for a modern infotainment show. Your humor is sharp, "
+        "dry, ironic, and observational—think a mix of Reddit's r/todayilearned and Kurzgesagt. "
+        "CRITICAL: Never use cheesy puns, textbook filler, or generic trivia. Focus on the absurd, "
+        "the chaotic, or the historical ironies found within the context."
+    )
+
+    if stick_to_article_only:
+        user_prompt = (
+            f"Analyze the following source text: '{information}'.\n"
+            f"Extract 5 facts that sound fake but are 100% true based ONLY on this text. "
+            f"Highlight the most ridiculous or ironic elements of the material."
+        )
+    else:
+        user_prompt = f"Generate 5 deeply weird, ironic, or funny facts about {information}."
+
+    client = get_openai_client()
+
+    try:
+        response = client.chat.completions.parse(
+            model="gpt-5-nano",
+            messages=[
+                {"role": "system", "content": role_description},
+                {"role": "user", "content": user_prompt},
+            ],
+            response_format=FunResponse,
+        )
+    except Exception as e:
+        print(f"Uh oh, seems I couldn't run your request: {e}")
+        return None
+
+    raw_facts_list = response.choices[0].message.parsed.facts
+    stylized_facts_list = []
+    final_style = stylization(raw_facts_list, stylized_facts_list)
+    return final_style
 
 
 def get_fantastic5(information, subtopic, stick_to_article_only = True) -> list[str] | None:
@@ -96,28 +167,6 @@ def get_fantastic5(information, subtopic, stick_to_article_only = True) -> list[
 
     raw_facts_list = response.choices[0].message.parsed.facts
     stylized_facts_list = []
+    final_style = stylization(raw_facts_list, stylized_facts_list)
+    return final_style
 
-    # Verarbeitet und richtet die Textblöcke dynamisch aneinander aus
-    for fact_string in raw_facts_list:
-        wrapped_lines = []
-        for line in fact_string.split('\n'):
-            cleaned_line = line.strip()
-
-            # Leere Zeilen überspringen
-            if not cleaned_line:
-                wrapped_lines.append("")
-                continue
-
-            if cleaned_line.startswith("💥"):
-                # Überschrift: Bleibt linksbündig, Folgezeilen rücken 3 Leerzeichen ein
-                wrapped = textwrap.fill(cleaned_line, width=80, subsequent_indent="   ")
-            else:
-                # Fließtext: Der gesamte Block rückt 3 Leerzeichen ein, damit alles sauber untereinander steht
-                wrapped = textwrap.fill(cleaned_line, width=80, initial_indent="   ", subsequent_indent="   ")
-
-            wrapped_lines.append(wrapped)
-
-        stylized_facts_list.append("\n".join(wrapped_lines))
-
-    # Gibt die flache Liste mit den perfekt formatierten Textblöcken zurück
-    return stylized_facts_list
