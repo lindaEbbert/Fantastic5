@@ -1,61 +1,55 @@
 """
 Programmed by Hans-Günter Klemp 19.05.2026
 programming language: Python
-funktion1: Get themes of suggestion
-funktion2: Get text from url
+function 1: Get random Wikipedia page
+function 2: Get themes of suggestion
+function 3: Get text from url
 """ # Linda: <3
 
-import wikipedia
+import wikipediaapi
+import random
+
+def wiki_random():
+    """Returns a random Wikipedia page"""
+
+    wiki = wikipediaapi.Wikipedia(
+        language="en",
+        user_agent="WikiTool/1.0 (learning project)"
+    )
+    result = []
+    pages = wiki.random(limit=5)
+
+    return list(pages.keys())
 
 def wiki_themesearch(suggestion):
     """Returns 5 Themes from the Wikipedia API"""
-    error_counter = 0
-    last_error = None
 
-    wikipedia.set_lang("en")
+    wiki = wikipediaapi.Wikipedia(
+        language="en",
+        user_agent="WikiTool/1.0 (learning project)"
+    )
 
     if not suggestion:
-        suggestion = "None"
+        suggestion = "Wikipedia"
 
-    while error_counter < 5:
-        try:
-            titles = wikipedia.search(suggestion, results = 5)
-            return titles
- 
-        except Exception as e:
-            error_counter += 1
-            last_error = e
+    results = wiki.search(suggestion, limit = 5)
 
-    return f"Fehler nach 5 Versuchen: {last_error}"
-
+    return list(results.pages.keys())
 
 
 def wiki_text(title):
     """Returns the text of the Wikipedia page"""
-    error_counter = 0
-    last_error = None
 
-    wikipedia.set_lang("en")
-    while error_counter <= 5:
-        try:
-            text = wikipedia.page(title).content
+    wiki = wikipediaapi.Wikipedia(
+        language="en",
+        user_agent="WikiTool/1.0 (learning project)"
+    )
 
-        except ConnectionError:
-            error_counter += 1
-            if error_counter <= 5:
-                return "Fehler: Keine Internetverbindung"
+    page = wiki.page(title)
 
-        except Exception as e:
-            error_counter += 1
-            if error_counter <= 5:
-                return f"Fehler: {e}"
+    if not page.exists():
+        return ["Fehler", "Seite nicht gefunden"]
 
-        else:
-            return text
+    return page.text
 
-###Dean
-### Were the requirement that you HAVE to use the WikiAPi or that you CAN use the api if you choose ?
-### be carefull that you do not disqualify yourselves by not complying with the requirements
 
-### Günter
-### functions changed to wikiapi requests
