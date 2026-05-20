@@ -1,26 +1,36 @@
 import modules.wiki as wiki
 import modules.openai_api as openai_api
+import time
+from rich.progress import track
+from rich.console import Console
+from rich.theme import Theme
+
+five_fact_foundry_theme = Theme({"input":"green", "waiting":"yellow", "output":"blue", "choice":"cyan"})
+console = Console(theme = five_fact_foundry_theme)
 
 
 def titel_print():
-    print("*************************************")
-    print("************** This is **************")
-    print("********** THE FANTASTIC 5 **********")
-    print("************** made by **************")
-    print("********* FIVE FACT FOUNDRY *********")
-    print("*************************************")
+    console.print("*************************************", style="blue on white")
+    console.print("[red on white]*********     [/][black on white] This is [/][red on white]     *********[/]")
+    console.print("[blue on white]********* [/][bold blue on white] THE FANTASTIC 5 [/][blue on white] *********[/]")
+    console.print("[red on white]*********     [/][black on white] made by [/][red on white]     *********[/]")
+    console.print("[blue on white]*********[/][bold red on white] FIVE FACT FOUNDRY [/][blue on white]*********[/]")
+    console.print("*************************************", style="red on white")
     print(" ")
 
 
 def user_main_input():
-    user_main_topic = input("Please give me your topic of this request (english only!): ")
-    print("Give me a second for checking your request...")
+    user_main_topic = console.input("[bold purple]Please give me your topic of this request (english only!):[/bold purple] ")
+    print(" ")
+    console.print("Give me a second for checking your request...", style = "waiting")
+    for i in track(range(100), description=""):
+        time.sleep(0.05)
     print(" ")
     return user_main_topic
 
 
 def show_us_the_first_5(first_5):
-    print("Here are the results of your request:")
+    console.print("Here are the results of your request:", style = "choice")
     top_num = 1
     for index in first_5:
         print(f"{top_num}. {first_5[top_num - 1]}")
@@ -29,8 +39,11 @@ def show_us_the_first_5(first_5):
 
 
 def choose_one_of_the_first_5():
-    user_first_5_choice  = int(input("Please select one of the possible topics (1-5 only!): "))
-    print("Great choice! I'm currently putting everything together for your selected content...")
+    user_first_5_choice  = int(console.input("[bold purple]Please select one of the possible topics (1-5 only!):[/bold purple] "))
+    print(" ")
+    console.print("Great choice! I'm currently putting everything together for your selected content...", style = "waiting")
+    for i in track(range(100), description=""):
+        time.sleep(0.05)
     print(" ")
     return user_first_5_choice
 
@@ -58,7 +71,7 @@ def get_the_chosen_word(number_of_choice, wiki_output_first_5):
 
 
 def show_us_the_5_subtopics(the_5_subtopics):
-    print("Here are the subtopics you can choose from:")
+    console.print("Here are the subtopics you can choose from:", style = "choice")
     top_sub = 1
 
     #print(f"Type: {type(the_5_subtopics)}")
@@ -71,30 +84,46 @@ def show_us_the_5_subtopics(the_5_subtopics):
 
 
 def choose_one_of_the_subtopics():
-    user_subtopic_choice  = int(input("Please select one of my subtopic (1-5 only!): "))
+    user_subtopic_choice  = int(console.input("[bold purple]Please select one of my subtopics (1-5 only!):[/bold purple] "))
     return user_subtopic_choice
 
 
 def get_the_chosen_subtopic(selected_subtopic, open_ai_subtopic_of_5):
     if selected_subtopic == 1:
-        print(f"Stay patient! Your FANTASTIC 5 of {open_ai_subtopic_of_5[0]} are on its way...")
+        print(" ")
+        console.print(f"Stay patient! Your FANTASTIC 5 of {open_ai_subtopic_of_5[0]} are on its way...", style = "waiting")
+        for i in track(range(100), description=""):
+            time.sleep(0.05)
         print(" ")
         return open_ai_subtopic_of_5[0]
     elif selected_subtopic == 2:
-        print(f"Stay patient! Your FANTASTIC 5 of {open_ai_subtopic_of_5[1]} are on its way...")
+        print(" ")
+        console.print(f"Stay patient! Your FANTASTIC 5 of {open_ai_subtopic_of_5[1]} are on its way...", style = "waiting")
+        for i in track(range(100), description=""):
+            time.sleep(0.05)
         print(" ")
         return open_ai_subtopic_of_5[1]
     elif selected_subtopic == 3:
-        print(f"Stay patient! Your FANTASTIC 5 of {open_ai_subtopic_of_5[2]} are on its way...")
+        print(" ")
+        console.print(f"Stay patient! Your FANTASTIC 5 of {open_ai_subtopic_of_5[2]} are on its way...", style = "waiting")
+        for i in track(range(100), description=""):
+            time.sleep(0.05)
         print(" ")
         return open_ai_subtopic_of_5[2]
     elif selected_subtopic == 4:
-        print(f"Stay patient! Your FANTASTIC 5 of {open_ai_subtopic_of_5[3]} are on its way...")
+        print(" ")
+        console.print(f"Stay patient! Your FANTASTIC 5 of {open_ai_subtopic_of_5[3]} are on its way...", style = "waiting")
+        for i in track(range(100), description=""):
+            time.sleep(0.05)
         print(" ")
         return open_ai_subtopic_of_5[3]
     elif selected_subtopic == 5:
-        user_subtopic = input("Alright! Please give me your desired subtopic: ")
-        print(f"Stay patient! Your FANTASTIC 5 of {user_subtopic} are on its way...")
+        print(" ")
+        user_subtopic = console.input("[bold purple]Alright! Please give me your desired subtopic:[/bold purple] ")
+        print(" ")
+        console.print(f"Stay patient! Your [bold blue]FANTASTIC 5[/] of [bold green]{choose_subtopic}[/] are on its way...", style = "waiting")
+        for i in track(range(100), description=""):
+            time.sleep(0.05)
         print(" ")
         return user_subtopic
     else:
@@ -102,16 +131,17 @@ def get_the_chosen_subtopic(selected_subtopic, open_ai_subtopic_of_5):
 
 
 def final_fantastic_5(the_5_facts, choose_subtopic):
-    print(f"And here are your final FANTASTIC 5 facts about {choose_subtopic}:")
-    print(f"1. {the_5_facts[0]}")
-    print(f"2. {the_5_facts[1]}")
-    print(f"3. {the_5_facts[2]}")
-    print(f"4. {the_5_facts[3]}")
-    print(f"5. {the_5_facts[4]}")
+    console.print(f"And here are your final [bold blue]FANTASTIC 5[/] facts about [bold green]{choose_subtopic}[/]:", style = "choice")
     print(" ")
-    print("We hope, you had a little bit of fun with our FANTASTIC 5!")
+    print(f"1. {the_5_facts[0]}", end="\n\n")
+    print(f"2. {the_5_facts[1]}", end="\n\n")
+    print(f"3. {the_5_facts[2]}", end="\n\n")
+    print(f"4. {the_5_facts[3]}", end="\n\n")
+    print(f"5. {the_5_facts[4]}", end="\n\n")
+    print(" ", end="\n\n")
+    console.print("We hope, you had a little bit of fun with our [bold blue]FANTASTIC 5![/]")
     print(" ")
-    print("We are Günter, Linda, Marcel & Thorsten - FIVE FACT FOUNDRY")
+    console.print("We are Günter, Linda, Marcel & Thorsten - FIVE FACT FOUNDRY", end="\n\n\n\n", style = "bold underline red")
 
 
 def main():
