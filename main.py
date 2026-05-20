@@ -43,10 +43,6 @@ def user_main_input():
         user_main_topic = console.input("[bold purple]Please give me your topic of this request (english only!):[/bold purple] ")
         print(" ")
         is_valid = check_topic_input_from_user_is_ok(user_main_topic)
-    console.print("Give me a second for checking your request...", style = "waiting")
-    for i in track(range(100), description=""):
-        time.sleep(0.05)
-    print(" ")
     return user_main_topic
 
 
@@ -122,11 +118,28 @@ def print_the_subtopics_options(the_5_subtopics):
     print("")
 
 
+def print_waiting_message_before_wiki_search():
+    console.print("Give me a second for checking your request...", style="waiting")
+    for i in track(range(100), description=""):
+        time.sleep(0.05)
+    print(" ")
+
+
 def print_waiting_message_before_subtopic_generation():
     """ Prints a waiting message for the user to see that the subtopic generation is in progress
     """
     print(" ")
     console.print("Great choice! I'm currently putting everything together for your selected content...", style="waiting")
+    for i in track(range(100), description=""):
+        time.sleep(0.05)
+    print(" ")
+
+
+def print_waiting_message_before_fact_generation(user_subtopic):
+    """ Prints a waiting message for the user to see that the fact generation is in progress"""
+    print(" ")
+    console.print(f"Stay patient! Your [bold blue]FANTASTIC 5[/] of [bold green]{user_subtopic}[/] are on its way...",
+                  style="waiting")
     for i in track(range(100), description=""):
         time.sleep(0.05)
     print(" ")
@@ -156,12 +169,6 @@ def get_the_chosen_subtopic(selected_subtopic_int, subtopics_list):
     if selected_subtopic_int == 5:
         print(" ")
         user_subtopic = console.input("[bold purple]Alright! Please give me your desired subtopic:[/bold purple] ")
-        print(" ")
-        console.print(f"Stay patient! Your [bold blue]FANTASTIC 5[/] of [bold green]{user_subtopic}[/] are on its way...",
-                      style="waiting")
-        for i in track(range(100), description=""):
-            time.sleep(0.05)
-        print(" ")
         return user_subtopic
     subtopic_str = subtopics_list[selected_subtopic_int - 1]
     return subtopic_str
@@ -189,6 +196,7 @@ def run_fantastic_5(funtastic = False):
     """Runs the fantastic 5 program"""
     # get topic
     for_the_first_5 = user_main_input()
+    print_waiting_message_before_wiki_search()
     wiki_output_first_5 = wiki.wiki_themesearch(for_the_first_5)
 
     is_valid_title_list = check_themesearch_output(wiki_output_first_5)
@@ -212,26 +220,31 @@ def run_fantastic_5(funtastic = False):
         # user chooses subtopic
         chosen_subtopic = get_the_chosen_subtopic(selected_subtopic, nano_subtopics)  # takes int and returns str
         # OPENAI API CALL
+        print_waiting_message_before_fact_generation(chosen_subtopic)
         the_5_facts = openai_api.get_fantastic5(get_wiki_text, chosen_subtopic, stick_to_article_only=(selected_subtopic != 5))  # sticks to article only if user selected suggested subtopic
         print_final_facts(the_5_facts, chosen_subtopic)
     else:
         # OPENAI API CALL
+        print_waiting_message_before_fact_generation(chosen_topic)
         the_5_facts = openai_api.get_funtastic5(get_wiki_text, chosen_topic)
         print_final_facts(the_5_facts, chosen_topic, fun=True)
     return None
 
 
 def run_funfacts_for_random_topic():
+    print_waiting_message_before_wiki_search()
     random_articles = wiki.wiki_random()
     show_us_the_first_5(random_articles)
     selected_article_int = choose_one_of_the_first_5()
     chosen_topic = get_user_choice_str(selected_article_int, random_articles)
     wiki_text = wiki.wiki_text(chosen_topic)
+    print_waiting_message_before_fact_generation(chosen_topic)
     the_5_facts = openai_api.get_funtastic5(wiki_text, chosen_topic)
     print_final_facts(the_5_facts, chosen_topic, fun=True)
 
 
 def run_fantastic_5_for_random():
+    print_waiting_message_before_wiki_search()
     random_articles = wiki.wiki_random()
     show_us_the_first_5(random_articles)
     selected_article_int = choose_one_of_the_first_5()
@@ -242,6 +255,7 @@ def run_fantastic_5_for_random():
     print_the_subtopics_options(subtopics_by_ai)
     selected_subtopic_int = choose_one_of_the_subtopics()
     chosen_subtopic = get_the_chosen_subtopic(selected_subtopic_int, subtopics_by_ai)
+    print_waiting_message_before_fact_generation(chosen_subtopic)
     fantastic_five_facts = openai_api.get_fantastic5(wiki_text, chosen_subtopic, stick_to_article_only=(selected_subtopic_int != 5))  # sticks to article only if user selected suggested subtopic
     print_final_facts(fantastic_five_facts, chosen_subtopic)
 
